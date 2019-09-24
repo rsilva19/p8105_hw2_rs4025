@@ -12,12 +12,16 @@ library(tidyverse)
 
 Questions: 
 - best way to print var names? I did names()
+- do we have to specify col_types or can we let R do that 
+- convert month abrrev to full month 
+- make year as.numeric?
 
 ## Problem 1 
 
 ```{r}
 #read and clean data
-data_trash = readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", 
+data_trash = 
+  readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", 
                           sheet = 1,
                           range = "A2:N38") %>%
   janitor::clean_names() %>%
@@ -25,13 +29,15 @@ data_trash = readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.x
   mutate( sports_balls = as.integer(
     round(sports_balls)))
 
-data_precip2017 = readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", 
+data_precip2017 = 
+  readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", 
                           sheet = 4,
                           range = "A2:B14") %>% 
   janitor::clean_names() %>%
   mutate( year = 2017)
 
-data_precip2018 = readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", 
+data_precip2018 = 
+  readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", 
                           sheet = 3,
                           range = "A2:B14") %>% 
   janitor::clean_names() %>%
@@ -69,4 +75,79 @@ The data set named 'data_precip' gives information about the precipitation in 20
 
 The total precipitation in 2018 is `r total_precip` inches. The median number of sports balls in a dumpster is `r median` since there is no observation of a dumpster in 2017 in the data set 'data_trash'. 
 
+## Problem 2
 
+```{r}
+# pols data
+pols = 
+  read_csv("./data/fivethirtyeight_datasets/pols-month.csv") %>% 
+  separate(mon, 
+           into = c("year", "month", "day"), 
+           sep = "-") %>% 
+  mutate( month = str_to_lower(month.name[as.numeric(month)]),
+          year = as.numeric(year)) %>% 
+  pivot_longer(c(prez_gop, prez_dem), 
+               names_to = "president", 
+               names_prefix = "prez_", 
+               values_to = "logical") %>% #what to name?
+  select( - day)
+
+```
+
+
+```{r}
+# snp data
+snp = 
+  read_csv("./data/fivethirtyeight_datasets/snp.csv") %>% 
+  separate(date, 
+           into = c("month", "day", "year"), 
+           sep = "/") %>% 
+  mutate( month = str_to_lower(month.name[as.numeric(month)]),
+          year = as.numeric(year)) %>% 
+  arrange( year, month) %>% 
+  select( year, month, close)
+
+```
+
+```{r}
+# unemployment data 
+unemployment = 
+  read_csv("./data/fivethirtyeight_datasets/unemployment.csv") %>% 
+  janitor::clean_names() %>% 
+  rename( january = jan, 
+          febuary = feb, 
+          march = mar,
+          april = apr, 
+          june = jun,
+          july = jul,
+          august = aug, 
+          september = sep, 
+          october = oct, 
+          november = nov, 
+          december = dec) %>% 
+  pivot_longer(january:december, 
+               names_to = "month", 
+               values_to = "percent_unemployed") 
+```
+
+
+```{r}
+# join data 
+
+final_join = 
+  left_join(
+    left_join(pols, snp,  # first join 
+              by = c("year", "month")), 
+    unemployment, 
+    by = c("year", "month"))
+```
+
+The 'pol' dataset was initially a dataset with 9 variables giving counts of democratic and republican politicians. We tidied some of the variables by changing the 'date' column labeled 'mon' into separate variables for year and month, and condensing two columns which indicate whether a president was democratic or republican. The resulting dataset has `r nrow(pols)` observations of `r ncol(pols)` variables. 
+
+The 'snp' data initially contained `r nrow(snp)` observations of two variables: date, and closing value of S&P index (labeled 'close'). We tidied the date column to contain variables 'year' and 'month' and arranged the observations by year and month. The dataset now contains `r ncol(snp)` variables. 
+
+Lastly, the 'unemployment' data contained the unemployment percentage for 69 specified months of a certain year. Each month was a separate column which we condensed into one named 'month' and added the variable 'percent_unemployed' to contain the values of each month variable. This resulted in more observations, specifically `r nrow(unemployment)` observations, and only `r ncol(unemployment)` variables. 
+
+We merged all three of the above datasets into the dataset 'final_join'.
+
+add dimensions, range of years, key vars 
