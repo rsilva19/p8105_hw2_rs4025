@@ -140,14 +140,22 @@ final_join =
               by = c("year", "month")), 
     unemployment, 
     by = c("year", "month"))
+
+# order with key variables first
+final_join = 
+  final_join %>% 
+  select(year, month, president:percent_unemployed, everything() )
+
 ```
 
-The 'pol' dataset was initially a dataset with 9 variables giving counts of democratic and republican politicians. We tidied some of the variables by changing the 'date' column labeled 'mon' into separate variables for year and month, and condensing two columns which indicate whether a president was democratic or republican. The resulting dataset has `r nrow(pols)` observations of `r ncol(pols)` variables. 
+ Explain briefly what each dataset contained, and describe the resulting dataset (e.g. give the dimension, range of years, and names of key variables).
 
-The 'snp' data initially contained `r nrow(snp)` observations of two variables: date, and closing value of S&P index (labeled 'close'). We tidied the date column to contain variables 'year' and 'month' and arranged the observations by year and month. The dataset now contains `r ncol(snp)` variables. 
+The 'pol' dataset was initially a dataset with 9 variables giving counts of democratic and republican politicians from `r min(pull(pols, year))` to `r max(pull(pols, year))`. The 'date' column labeled 'mon' became separate variables for year and month and we condensed two columns which indicate whether a president was a democrat or republican, labeling 'president' as the variable that indicates their affiliate party and 'logical' as the variable representing a '1' for democrat and '0' for republican. The resulting dataset has `r nrow(pols)` observations of `r ncol(pols)` variables. 
 
-Lastly, the 'unemployment' data contained the unemployment percentage for 69 specified months of a certain year. Each month was a separate column which we condensed into one named 'month' and added the variable 'percent_unemployed' to contain the values of each month variable. This resulted in more observations, specifically `r nrow(unemployment)` observations, and only `r ncol(unemployment)` variables. 
+The 'snp' data initially contained `r nrow(snp)` observations of two variables: date, and closing value of S&P index (labeled 'close'). We tidied the date column to contain variables 'year' and 'month' and arranged the observations by year and month. The dataset now contains `r ncol(snp)` variables and ranges from `r min(pull(snp, year))` to `r max(pull(snp, year))`. 
 
-We merged all three of the above datasets into the dataset 'final_join'.
+Lastly, the 'unemployment' data contained the unemployment percentage for 69 specified months of years ranging from `r min(pull(unemployment, year))` to `r max(pull(unemployment, year))`. Each month was a separate column which we condensed into one named 'month' and added the variable 'percent_unemployed' to contain the values of each month variable. This resulted in more observations, specifically `r nrow(unemployment)` observations, and only `r ncol(unemployment)` variables. 
 
-add dimensions, range of years, key vars 
+We merged all three of the above datasets into the dataset 'final_join'. The final dataset contains `r nrow(final_join)` observations of `r ncol(final_join)` variables which includes observations from `r min(pull(final_join, year))` to `r max(pull(unemployment, year))`. We are most interested in the variables 'year', 'month', 'president', 'logical', 'close', and 'percent_unemployed', all previously described. Due to the nature of joining data, we are left with NA's, most coming from specific years when that data might not have been collected. 
+
+
