@@ -12,3 +12,39 @@ library(tidyverse)
 
 ## Problem 1 
 
+```{r}
+#read and clean data
+data_trash = readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", 
+                          sheet = 1,
+                          range = "A2:N38") %>%
+  janitor::clean_names() %>%
+  filter( dumpster != "NA") %>% 
+  mutate( sports_balls = as.integer(
+    round(sports_balls)))
+
+data_precip2017 = readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", 
+                          sheet = 4,
+                          range = "A2:B14") %>% 
+  janitor::clean_names() %>%
+  mutate( year = 2017)
+
+data_precip2018 = readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", 
+                          sheet = 3,
+                          range = "A2:B14") %>% 
+  janitor::clean_names() %>%
+  mutate( year = 2018)
+
+# combine 2017 and 2018 data  (join or bind?)
+data_precip = 
+  left_join(data_precip2017, data_precip2018, by = "month, ")
+  
+data_precip = 
+  bind_rows(data_precip2017, data_precip2018) %>%
+  janitor::clean_names() %>% 
+  mutate( month = month.name(month))
+
+
+
+```
+
+
