@@ -10,6 +10,9 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
+Questions: 
+- best way to print var names? I did names()
+
 ## Problem 1 
 
 ```{r}
@@ -33,18 +36,37 @@ data_precip2018 = readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7
                           range = "A2:B14") %>% 
   janitor::clean_names() %>%
   mutate( year = 2018)
+```
 
+```{r}
 # combine 2017 and 2018 data  (join or bind?)
-data_precip = 
-  left_join(data_precip2017, data_precip2018, by = "month, ")
   
 data_precip = 
   bind_rows(data_precip2017, data_precip2018) %>%
   janitor::clean_names() %>% 
-  mutate( month = month.name(month))
-
-
-
+  mutate( month = str_to_lower( month.name[month] ))
+  
 ```
+
+```{r}
+# total precip in 2018
+total_precip = 
+  data_precip %>%
+  filter( year == 2018) %>% 
+  summarize( total = sum(total, na.rm = T))
+
+# median number of sports balls in a dumpster in 2017
+median = 
+  data_trash %>% 
+  filter( year == 2017) %>% 
+  summarize( median = median(sports_balls, na.rm = T))
+```
+
+
+The data set named 'data_trash' gives information about trash disposal in specified dumpsters. The data set has `r nrow(data_trash)` observations and `r ncol(data_trash)` variables. Some key variables include the dumpster number, the date the trash is collected, and how much the trash weighs which are named `r names(data_trash)[1]`, `r names(data_trash)[4]`, and `r names(data_trash)[5]`, respectively. Many of the variables consist of frequent types of trash collected such as `r names(data_trash)[7]`, `r names(data_trash)[9]` and `r names(data_trash)[11]`.
+
+The data set named 'data_precip' gives information about the precipitation in 2017 and 2018. There are `r nrow(data_precip)` observations and `r ncol(data_precip)` variables, which are `r names(data_precip)[1]`, `r names(data_precip)[2]` and `r names(data_precip)[3]`.
+
+The total precipitation in 2018 is `r total_precip` inches. The median number of sports balls in a dumpster is `r median` since there is no observation of a dumpster in 2017 in the data set 'data_trash'. 
 
 
