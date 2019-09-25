@@ -148,7 +148,6 @@ final_join =
 
 ```
 
- Explain briefly what each dataset contained, and describe the resulting dataset (e.g. give the dimension, range of years, and names of key variables).
 
 The 'pol' dataset was initially a dataset with 9 variables giving counts of democratic and republican politicians from `r min(pull(pols, year))` to `r max(pull(pols, year))`. The 'date' column labeled 'mon' became separate variables for year and month and we condensed two columns which indicate whether a president was a democrat or republican, labeling 'president' as the variable that indicates their affiliate party and 'logical' as the variable representing a '1' for democrat and '0' for republican. The resulting dataset has `r nrow(pols)` observations of `r ncol(pols)` variables. 
 
@@ -158,4 +157,30 @@ Lastly, the 'unemployment' data contained the unemployment percentage for 69 spe
 
 We merged all three of the above datasets into the dataset 'final_join'. The final dataset contains `r nrow(final_join)` observations of `r ncol(final_join)` variables which includes observations from `r min(pull(final_join, year))` to `r max(pull(unemployment, year))`. We are most interested in the variables 'year', 'month', 'president', 'logical', 'close', and 'percent_unemployed', all previously described. Due to the nature of joining data, we are left with NA's, most coming from specific years when that data might not have been collected. 
 
+## Problem 3 
+
+```{r}
+# read in dataset 
+baby_names = 
+  read_csv("./data/Popular_Baby_Names.csv", 
+           col_types = "dcccdd") %>% 
+  janitor::clean_names() %>% 
+  mutate( gender = str_to_lower(gender), 
+          ethnicity = str_to_lower(ethnicity), 
+          childs_first_name = str_to_lower(childs_first_name),
+          ethnicity = ifelse( 
+            ethnicity == "asian and paci" | ethnicity == "asian and pacific islander", 
+            "asian and pacific islander", 
+                              ifelse( 
+                                ethnicity == "black non hisp" | ethnicity == "black non hispanic", 
+                                "black non hispanic", 
+                                ifelse( 
+                                  ethnicity == "white non hisp" | ethnicity == "white non hispanic" , 
+                                  "white non hispanic", "hispanic")))) %>% 
+  distinct(.keep_all = TRUE) # remove duplicate rows 
+
+
+#testing = baby_names %>% group_by(year_of_birth, gender, ethnicity, childs_first_name, count, rank)%>% summarize( total = n())
+
+```
 
