@@ -15,6 +15,7 @@ Questions:
 - do we have to specify col_types or can we let R do that 
 - convert month abrrev to full month 
 - make year as.numeric?
+- order years in ascending?
 
 ## Problem 1 
 
@@ -182,5 +183,54 @@ baby_names =
 
 #testing = baby_names %>% group_by(year_of_birth, gender, ethnicity, childs_first_name, count, rank)%>% summarize( total = n())
 
+```
+
+
+Produce a well-structured, reader-friendly table showing the rank in popularity of the name “Olivia” as a female baby name over time; this should have rows for ethnicities and columns for year. 
+
+```{r}
+olivia = 
+  baby_names %>% 
+  filter(childs_first_name == "olivia", gender == "female") %>% 
+  pivot_wider(
+    names_from = "year_of_birth", 
+    values_from = "rank"
+  ) %>% 
+  select( -c(gender, childs_first_name, count))
+
+knitr::kable(olivia)
+
+##** order years in ascending?
+```
+
+Produce a similar table showing the most popular name among male children over time.
+```{r}
+boy_names = 
+  baby_names %>% 
+  filter( rank == 1, gender == "male") %>% 
+  select( - c(gender, count)) %>% 
+  pivot_wider(
+    names_from = "year_of_birth", 
+    values_from = "rank"
+  )
+
+knitr::kable(boy_names)
+# show all genders?
+```
+
+
+Finally, for male, white non-hispanic children born in 2016, produce a scatter plot showing the number of children with a name (y axis) against the rank in popularity of that name (x axis).
+
+```{r}
+plot_data = 
+  baby_names %>% 
+  filter( gender == "male", 
+          ethnicity == "white non hispanic",
+          year_of_birth == 2016)
+
+ggplot(plot_data, aes(x = rank, y = count)) + 
+  geom_point() + 
+  ggtitle("Count vs Rank") +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
