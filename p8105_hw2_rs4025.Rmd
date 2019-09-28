@@ -52,7 +52,8 @@ data_precip2018 =
 data_precip = 
   bind_rows(data_precip2017, data_precip2018) %>%
   janitor::clean_names() %>% 
-  mutate( month = str_to_lower( month.name[month] ))
+  mutate( month = str_to_lower( month.name[month] )) %>% 
+  select( year, month, total)
 ```
 
 ```{r}
@@ -89,8 +90,10 @@ pols =
   pivot_longer(c(prez_gop, prez_dem), 
                names_to = "president", 
                names_prefix = "prez_", 
-               values_to = "logical") %>% #what to name?
+               values_to = "logical") %>%
+  mutate( logical = replace( logical, logical == 2, 1)) %>% 
   select( - day)
+
 
 ```
 
@@ -148,7 +151,7 @@ final_join =
 ```
 
 
-The 'pol' dataset was initially a dataset with 9 variables giving counts of democratic and republican politicians from the years `r min(pull(pols, year))` to `r max(pull(pols, year))`. The date column, labeled 'mon', became separate variables for year and month and we condensed two columns which indicate whether a president was a democrat or republican, labeling 'president' as the variable that indicates their affiliate party and 'logical' as the variable representing a '1' for democrat and '0' for republican. The resulting dataset has `r nrow(pols)` observations of `r ncol(pols)` variables. 
+The 'pol' dataset was initially a dataset with 9 variables giving counts of democratic and republican politicians from the years `r min(pull(pols, year))` to `r max(pull(pols, year))`. The date column, labeled 'mon', became separate variables for year and month and we condensed two columns which indicate whether a president was a democrat or republican, labeling 'president' as the variable that indicates their affiliate party and 'logical' as the variable representing a '1' for democrat and '0' for republican. Note there were 4 observations where logical = 2 but since the fivethirtyeight data description notes only two options (1 and 0) I made observations of 2 equal to 1 using mutate. The resulting dataset has `r nrow(pols)` observations of `r ncol(pols)` variables. 
 
 The 'snp' dataset initially contained `r nrow(snp)` observations of 2 variables: date, and closing value of S&P index (labeled 'close'). We tidied the date column to contain variables 'year' and 'month' and arranged the observations by year and month. The dataset now contains `r ncol(snp)` variables and ranges from the years `r min(pull(snp, year))` to `r max(pull(snp, year))`, still with `r nrow(snp)` observations. 
 
@@ -163,24 +166,14 @@ We merged all three of the above datasets into the dataset 'final_join'. The fin
 baby_names = 
   read_csv("./data/Popular_Baby_Names.csv", 
            col_types = "dcccdd") %>% 
-  janitor::clean_names() %>% 
-  mutate( gender = str_to_lower(gender), 
-          ethnicity = str_to_lower(ethnicity), 
+  janitor::clean_names() %>%
+  mutate( gender = str_to_lower(gender),
           childs_first_name = str_to_lower(childs_first_name),
-          ethnicity = ifelse( 
-            ethnicity == "asian and paci" | ethnicity == "asian and pacific islander", 
-            "asian and pacific islander", 
-                              ifelse( 
-                                ethnicity == "black non hisp" | ethnicity == "black non hispanic", 
-                                "black non hispanic", 
-                                ifelse( 
-                                  ethnicity == "white non hisp" | ethnicity == "white non hispanic" , 
-                                  "white non hispanic", "hispanic")))) %>% 
+          ethnicity = str_to_lower(ethnicity),
+          ethnicity = replace( ethnicity, ethnicity == "white non hisp", "white non hispanic"), 
+          ethnicity  = replace( ethnicity, ethnicity == "black non hisp", "black non hispanic"), 
+          ethnicity  = replace( ethnicity, ethnicity == "asian and paci", "asian and pacific islander")) %>%
   distinct(.keep_all = TRUE) # remove duplicate rows 
-
-
-#testing = baby_names %>% group_by(year_of_birth, gender, ethnicity, childs_first_name, count, rank)%>% summarize( total = n())
-
 ```
 
 
@@ -189,15 +182,15 @@ baby_names =
 olivia = 
   baby_names %>% 
   filter(childs_first_name == "olivia", gender == "female") %>% 
+  select(-c(count, childs_first_name, gender)) %>% 
   pivot_wider(
     names_from = "year_of_birth", 
     values_from = "rank"
-  ) %>% 
-  select( -c(gender, childs_first_name, count))
+  )
+  
+knitr::kable(olivia, 
+             caption = "Table 1: Rank in Popularity of 'Olivia' Over Time")
 
-knitr::kable(olivia)
-
-##** order years in ascending?
 ```
 
 ```{r}
@@ -210,13 +203,33 @@ boy_names =
     names_from = "year_of_birth", 
     values_from = "rank"
   )
+#^ ignore (delete after ask Q)
 
-knitr::kable(boy_names)
-# show all genders?
+# find most popular boy name (Jayden)
+
+popular_boy = baby_names %>% 
+  filter(gender == "male", rank ==1) %>% 
+  group_by(childs_first_name) %>%
+  summarize(rank_num = n(), count_total = sum(count)) %>% 
+  arrange(desc(count_total)) 
+
+# dataset for rank of name Jayden 
+jayden = 
+  baby_names %>% 
+  filter(childs_first_name == "jayden", gender == "male") %>% 
+  select(-c(count, childs_first_name, gender)) %>% 
+  pivot_wider(
+    names_from = "year_of_birth", 
+    values_from = "rank"
+  )
+
+knitr::kable(jayden, 
+             caption = "Table 2: Rank in Popularity of 'Jayden' Over Time" )
+
 ```
 
 
-```{r}
+```{r, message = FALSE }
 # tidy dataset for plot 
 plot_data = 
   baby_names %>% 
@@ -227,7 +240,9 @@ plot_data =
 # scatter plot 
 ggplot(plot_data, aes(x = rank, y = count)) + 
   geom_point() + 
-  ggtitle("Count vs Rank") +
-  theme(plot.title = element_text(hjust = 0.5))
+  ggtitle("Frequency vs Rank of White Non-hispanic Boy Names in 2016") +
+  xlab("Rank of Name") +
+  ylab("Frequncy of Name") +
+  theme(plot.title = element_text(hjust = .5))
 ```
 
