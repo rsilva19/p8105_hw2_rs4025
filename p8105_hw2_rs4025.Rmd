@@ -14,9 +14,6 @@ library(kableExtra)
 Questions: 
 - best way to print var names? I did names()
 - do we have to specify col_types or can we let R do that 
-- convert month abrrev to full month 
-- make year as.numeric?
-- order years in ascending?
 
 ## Problem 1 
 
@@ -87,15 +84,12 @@ pols =
            into = c("year", "month", "day"), 
            sep = "-") %>% 
   mutate( month = str_to_lower(month.name[as.numeric(month)]),
-          year = as.numeric(year)) %>% 
-  pivot_longer(c(prez_gop, prez_dem), 
-               names_to = "president", 
-               names_prefix = "prez_", 
-               values_to = "logical") %>%
-  mutate( logical = replace( logical, logical == 2, 1)) %>% 
-  select( - day)
-
-
+          year = as.numeric(year),
+          president = recode(prez_gop, 
+                             `1` = "gop", 
+                             `2` = "gop", 
+                             `0` = "dem")) %>% 
+  select(year, month, president, everything(),  - c(day, prez_gop, prez_dem)) 
 ```
 
 
@@ -152,7 +146,7 @@ final_join =
 ```
 
 
-The 'pol' dataset was initially a dataset with 9 variables giving counts of democratic and republican politicians from the years `r min(pull(pols, year))` to `r max(pull(pols, year))`. The date column, labeled 'mon', became separate variables for year and month and we condensed two columns which indicate whether a president was a democrat or republican, labeling 'president' as the variable that indicates their affiliate party and 'logical' as the variable representing a '1' for democrat and '0' for republican. Note there were 4 observations where logical = 2 but since the fivethirtyeight data description notes only two options (1 and 0) I made observations of 2 equal to 1 using mutate. The resulting dataset has `r nrow(pols)` observations of `r ncol(pols)` variables. 
+The 'pol' dataset was initially a dataset with 9 variables giving counts of democratic and republican politicians from the years `r min(pull(pols, year))` to `r max(pull(pols, year))`. The date column, labeled 'mon', became separate variables for year and month and we condensed two columns which indicate whether a president was a democrat or republican, labeling 'president' as the variable that indicates their affiliate party. Note, there were 5 observations where `prez_gop` = 2 and `prez_dem` = 0, so I assume a `2` was meant to be `1`, meaning the president was republican. The resulting dataset has `r nrow(pols)` observations of `r ncol(pols)` variables. 
 
 The 'snp' dataset initially contained `r nrow(snp)` observations of 2 variables: date, and closing value of S&P index (labeled 'close'). We tidied the date column to contain variables 'year' and 'month' and arranged the observations by year and month. The dataset now contains `r ncol(snp)` variables and ranges from the years `r min(pull(snp, year))` to `r max(pull(snp, year))`, still with `r nrow(snp)` observations. 
 
