@@ -8,6 +8,7 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(kableExtra)
 ```
 
 Questions: 
@@ -224,7 +225,7 @@ jayden =
   )
 
 knitr::kable(jayden, 
-             caption = "Table 2: Rank in Popularity of 'Jayden' Over Time" )
+             caption = "Table 2: Rank in Popularity of 'Jayden' Over Time" ) 
 
 ```
 
