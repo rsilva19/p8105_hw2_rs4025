@@ -11,9 +11,6 @@ library(tidyverse)
 library(kableExtra)
 ```
 
-Questions: 
-- best way to print var names? I did names()
-- do we have to specify col_types or can we let R do that 
 
 ## Problem 1 
 
@@ -41,8 +38,10 @@ data_precip2018 =
   readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", 
                           sheet = 3,
                           range = "A2:B14") %>% 
-  janitor::clean_names() %>%
-  mutate( year = 2018)
+  janitor::clean_names() %>% 
+  mutate( year = 2018) %>% 
+  drop_na( total)
+
 ```
 
 ```{r}
