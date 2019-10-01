@@ -17,9 +17,9 @@ library(kableExtra)
 ```{r, reading/cleaning data}
 # dumpster data 
 data_trash = 
-  readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", 
-                          sheet = 1,
-                          range = "A2:N338") %>%
+  readxl::read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", 
+                          sheet = "Mr. Trash Wheel",
+                          range = "A2:N408") %>%
   janitor::clean_names() %>%
   filter( dumpster != "NA") %>% 
   mutate( sports_balls = as.integer(
@@ -27,25 +27,25 @@ data_trash =
 
 # precipitation 2017
 data_precip2017 = 
-  readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", 
-                          sheet = 4,
+  readxl::read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", 
+                          sheet = "2017 Precipitation",
                           range = "A2:B14") %>% 
   janitor::clean_names() %>%
-  mutate( year = 2017)
+  mutate( year = 2017 )
 
 # precipitation 2018
 data_precip2018 = 
-  readxl::read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", 
-                          sheet = 3,
+  readxl::read_excel("./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx", 
+                          sheet = "2018 Precipitation",
                           range = "A2:B14") %>% 
   janitor::clean_names() %>% 
-  mutate( year = 2018) %>% 
-  drop_na( total)
+  mutate( year = 2018 ) %>% 
+  drop_na( total )
 
 ```
 
 ```{r}
-# combine 2017 and 2018 data  (join or bind?)
+# combine 2017 and 2018 data
 data_precip = 
   bind_rows(data_precip2017, data_precip2018) %>%
   janitor::clean_names() %>% 
@@ -68,9 +68,9 @@ median =
 ```
 
 
-The data set named 'data_trash' gives information about trash disposal in specified dumpsters. The data set has `r nrow(data_trash)` observations and `r ncol(data_trash)` variables. Some key variables include the dumpster number, the date the trash is collected, and how much the trash weighs which are named `r names(data_trash)[1]`, `r names(data_trash)[4]`, and `r names(data_trash)[5]`, respectively. Many of the variables consist of frequent types of trash collected such as `r names(data_trash)[7]`, `r names(data_trash)[9]` and `r names(data_trash)[11]`. The median number of sports balls in a dumpster is `r median`.
+The data set, `data_trash`, gives information about trash disposal in specified dumpsters. The data set has `r nrow(data_trash)` observations and `r ncol(data_trash)` variables. Some key variables include the dumpster number, the date the trash is collected, and how much the trash weighs which are named `r names(data_trash)[1]`, `r names(data_trash)[4]`, and `r names(data_trash)[5]`, respectively. Many of the variables consist of frequent types of trash collected such as `r names(data_trash)[7]`, `r names(data_trash)[9]` and `r names(data_trash)[11]`. The median number of sports balls in a dumpster is `r median`.
 
-The data set named 'data_precip' gives information about the total precipitation in inches in 2017 and 2018 for each month. There are `r nrow(data_precip)` observations and `r ncol(data_precip)` variables, which are `r names(data_precip)[1]`, `r names(data_precip)[2]` and `r names(data_precip)[3]`. The total precipitation in 2018 is `r total_precip` inches.
+The data set, `data_precip`, gives information about the total precipitation in inches in 2017 and 2018 for each month. There are `r nrow(data_precip)` observations and `r ncol(data_precip)` variables, which are `r names(data_precip)[1]`, `r names(data_precip)[2]` and `r names(data_precip)[3]`. The total precipitation in 2018 is `r total_precip` inches.
 
 
 ## Problem 2
@@ -145,13 +145,13 @@ final_join =
 ```
 
 
-The 'pol' dataset was initially a dataset with 9 variables giving counts of democratic and republican politicians from the years `r min(pull(pols, year))` to `r max(pull(pols, year))`. The date column, labeled 'mon', became separate variables for year and month and we condensed two columns which indicate whether a president was a democrat or republican, labeling 'president' as the variable that indicates their affiliate party. Note, there were 5 observations where `prez_gop` = 2 and `prez_dem` = 0, so I assume a `2` was meant to be `1`, meaning the president was republican. The resulting dataset has `r nrow(pols)` observations of `r ncol(pols)` variables. 
+The `pol` dataset was initially a dataset with 9 variables giving counts of democratic and republican politicians from the years `r min(pull(pols, year))` to `r max(pull(pols, year))`. The date column, labeled `mon`, became separate variables for year and month and we condensed two columns which indicate whether a president was a democrat or republican, labeling `president` as the variable that indicates their affiliate party. Note, there were 5 observations where `prez_gop` = 2 and `prez_dem` = 0, so I assume a '2' was meant to be '1', meaning the president was republican. The resulting dataset has `r nrow(pols)` observations of `r ncol(pols)` variables. 
 
-The 'snp' dataset initially contained `r nrow(snp)` observations of 2 variables: date, and closing value of S&P index (labeled 'close'). We tidied the date column to contain variables 'year' and 'month' and arranged the observations by year and month. The dataset now contains `r ncol(snp)` variables and ranges from the years `r min(pull(snp, year))` to `r max(pull(snp, year))`, still with `r nrow(snp)` observations. 
+The `snp` dataset initially contained `r nrow(snp)` observations of 2 variables: date, and closing value of S&P index (labeled `close`). We tidied the date column to contain variables `year` and `month` and arranged the observations by year and month. The dataset now contains `r ncol(snp)` variables and ranges from the years `r min(pull(snp, year))` to `r max(pull(snp, year))`, still with `r nrow(snp)` observations. 
 
-Lastly, the 'unemployment' data contained the unemployment percentage for 69 months in the years ranging from `r min(pull(unemployment, year))` to `r max(pull(unemployment, year))`. Each month was a separate column which we condensed into one named 'month' and added the variable 'percent_unemployed' to contain the values of each month variable. This resulted in more observations, specifically `r nrow(unemployment)` observations, and only `r ncol(unemployment)` variables. 
+Lastly, the `unemployment` data contained the unemployment percentage for 69 months in the years ranging from `r min(pull(unemployment, year))` to `r max(pull(unemployment, year))`. Each month was a separate column which we condensed into one named `month` and added the variable `percent_unemployed` to contain the values of each month variable. This resulted in more observations, specifically `r nrow(unemployment)` observations, and only `r ncol(unemployment)` variables. 
 
-We merged all three of the above datasets into the dataset 'final_join'. The final dataset contains `r nrow(final_join)` observations of `r ncol(final_join)` variables which includes observations from the year `r min(pull(final_join, year))` to `r max(pull(unemployment, year))`. We are most interested in the variables 'year', 'month', 'president', 'logical', 'close', and 'percent_unemployed', all previously described. Due to the nature of joining data, we are left with some NA's, specifically `r sum(is.na(final_join))` NAs, most coming from specific years when that data might not have been collected. 
+We merged all three of the above datasets into the dataset `final_join`. The final dataset contains `r nrow(final_join)` observations of `r ncol(final_join)` variables which includes observations from the year `r min(pull(final_join, year))` to `r max(pull(unemployment, year))`. We are most interested in the variables `year`, `month`, `president`, `logical`, `close`, and `percent_unemployed`, all previously described. Due to the nature of joining data, we are left with some NA's, specifically `r sum(is.na(final_join))` NAs, most coming from specific years when that data might not have been collected. 
 
 ## Problem 3 
 
@@ -184,7 +184,6 @@ olivia =
   
 knitr::kable(olivia, 
              caption = "Table 1: Rank in Popularity of 'Olivia' Over Time")
-
 ```
 
 ```{r}
@@ -192,34 +191,15 @@ knitr::kable(olivia,
 boy_names = 
   baby_names %>% 
   filter( rank == 1, gender == "male") %>% 
-  select( - c(gender, count)) %>% 
+  group_by(year_of_birth, ethnicity) %>% 
+  select( - c(gender, count, rank)) %>% 
   pivot_wider(
     names_from = "year_of_birth", 
-    values_from = "rank"
-  )
-#^ ignore (delete after ask Q)
-
-# find most popular boy name (Jayden)
-
-popular_boy = baby_names %>% 
-  filter(gender == "male", rank ==1) %>% 
-  group_by(childs_first_name) %>%
-  summarize(rank_num = n(), count_total = sum(count)) %>% 
-  arrange(desc(count_total)) 
-
-# dataset for rank of name Jayden 
-jayden = 
-  baby_names %>% 
-  filter(childs_first_name == "jayden", gender == "male") %>% 
-  select(-c(count, childs_first_name, gender)) %>% 
-  pivot_wider(
-    names_from = "year_of_birth", 
-    values_from = "rank"
+    values_from = "childs_first_name"
   )
 
-knitr::kable(jayden, 
-             caption = "Table 2: Rank in Popularity of 'Jayden' Over Time" ) 
-
+knitr::kable(boy_names, 
+             caption = "Table 2: Most Popular Boy Names Over Time" ) 
 ```
 
 
@@ -234,9 +214,11 @@ plot_data =
 # scatter plot 
 ggplot(plot_data, aes(x = rank, y = count)) + 
   geom_point() + 
-  ggtitle("Frequency vs Rank of White Non-hispanic Boy Names in 2016") +
-  xlab("Rank of Name") +
-  ylab("Frequncy of Name") +
-  theme(plot.title = element_text(hjust = .5))
+  labs(
+    title = "Frequency vs Rank of White Non-hispanic Boy Names in 2016",
+    x = "Rank of Name",
+    y = "Frequncy of Name"
+  ) +
+ theme(plot.title = element_text(hjust = .5))
 ```
 
