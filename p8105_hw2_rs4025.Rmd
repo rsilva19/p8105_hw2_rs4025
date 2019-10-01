@@ -176,6 +176,8 @@ baby_names =
 olivia = 
   baby_names %>% 
   filter(childs_first_name == "olivia", gender == "female") %>% 
+  mutate(ethnicity = str_to_title(ethnicity)) %>%
+  rename(Ethnicity = ethnicity) %>% 
   select(-c(count, childs_first_name, gender)) %>% 
   pivot_wider(
     names_from = "year_of_birth", 
@@ -191,7 +193,10 @@ knitr::kable(olivia,
 boy_names = 
   baby_names %>% 
   filter( rank == 1, gender == "male") %>% 
-  group_by(year_of_birth, ethnicity) %>% 
+  mutate( childs_first_name = str_to_title(childs_first_name), 
+          ethnicity = str_to_title(ethnicity)) %>%
+  rename(Ethnicity = ethnicity) %>% 
+  group_by(year_of_birth, Ethnicity) %>% 
   select( - c(gender, count, rank)) %>% 
   pivot_wider(
     names_from = "year_of_birth", 
